@@ -1,0 +1,5 @@
+{
+  "name": "CompareBnB",
+  "description": "Compare Airbnb listings and get AI-powered recommendations based on your trip details.",
+  "requestFramePermissions": []
+}
