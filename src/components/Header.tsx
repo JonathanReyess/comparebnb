@@ -50,7 +50,9 @@ export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
               "w-auto transition-all duration-700 ease-in-out",
               "filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]",
               // Increased h-16 to h-24 (96px) or h-32 (128px)
-              isMoved ? "h-32 sm:h-48" : "h-[200px] sm:h-[400px]",
+              isMoved
+                ? "h-16 sm:h-32 md:h-48"
+                : "h-[180px] sm:h-[200px] md:h-[400px]",
             )}
           />
         </button>
@@ -58,7 +60,7 @@ export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
         {step === 0 && (
           <button
             onClick={onStartClick}
-            className="bg-white hover:bg-gray-100 text-gray-900 px-6 py-2.5 rounded-full font-semibold text-sm transition-all shadow-lg"
+            className="bg-white hover:bg-gray-100 text-gray-900 px-4 py-2 sm:px-6 sm:py-2.5 rounded-full font-semibold text-xs sm:text-sm transition-all shadow-lg whitespace-nowrap"
           >
             Start Comparing
           </button>
