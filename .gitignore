@@ -6,3 +6,9 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Local tooling and scripts
+airbnb_scrape/
+.agents/
+.claude/skills/
+

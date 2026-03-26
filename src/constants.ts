@@ -1,25 +1,10 @@
 import { Category } from './types';
 
 export const PREDEFINED_CATEGORIES: Category[] = [
-  { id: 'listing_name', label: 'Listing Name', type: 'string' },
-  { id: 'total_price', label: 'Total price', type: 'price' },
+  { id: 'total_price', label: 'Total Price', type: 'price' },
   { id: 'location', label: 'Location', type: 'string' },
-  { id: 'cost_per_person', label: 'Cost per person', type: 'price' },
   { id: 'bedrooms', label: 'Bedrooms', type: 'number' },
-  { id: 'max_guests', label: 'Max Guests', type: 'number' },
-  { id: 'beds', label: 'Beds', type: 'number' },
-  { id: 'primary_view', label: 'Primary View', type: 'string' },
-  { id: 'bathrooms', label: 'Bathrooms', type: 'number' },
-  { id: 'official_max_capacity', label: 'Official max capacity', type: 'number' },
-  { id: 'comfort_for_group', label: 'Comfort for group size', type: 'string' },
-  { id: 'lake_water_access', label: 'Lake / water access', type: 'boolean' },
-  { id: 'hot_tub', label: 'Hot tub', type: 'boolean' },
-  { id: 'gaming', label: 'Gaming', type: 'boolean' },
-  { id: 'outdoor_space', label: 'Outdoor space', type: 'boolean' },
-  { id: 'second_kitchen', label: 'Second kitchen', type: 'boolean' },
-  { id: 'privacy_level', label: 'Privacy level', type: 'string' },
-  { id: 'drive_time', label: 'Drive time from origin', type: 'string' },
-  { id: 'host_rating', label: 'Host rating', type: 'number' },
-  { id: 'outdoor_gear', label: 'Outdoor Gear', type: 'boolean' },
-  { id: 'house_age', label: 'House age', type: 'string' },
+  { id: 'host_rating', label: 'Host Rating', type: 'number' },
 ];
+
+export const NON_REMOVABLE_CATEGORY_IDS = new Set<string>();

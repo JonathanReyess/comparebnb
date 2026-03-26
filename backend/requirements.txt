@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+pyairbnb
+google-genai
+python-dotenv
+geopy
