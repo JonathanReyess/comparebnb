@@ -9,10 +9,12 @@ interface HeaderProps {
 
 export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isPastHero, setIsPastHero] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
+      setIsPastHero(window.scrollY > window.innerHeight * 0.75);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -44,12 +46,17 @@ export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
           )}
         >
           <img
-            src={isMoved ? "/white_comp_xs.svg" : "/compare_white.svg"}
+            src={
+              !isMoved
+                ? "/compare_white.svg"
+                : isPastHero
+                  ? "/blue_comp_xs.svg"
+                  : "/white_comp_xs.svg"
+            }
             alt="CompareBnB"
             className={cn(
-              "w-auto transition-all duration-700 ease-in-out",
-              "filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]",
-              // Increased h-16 to h-24 (96px) or h-32 (128px)
+              "w-auto block outline-none border-none transition-all duration-700 ease-in-out",
+              !isPastHero && "filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]",
               isMoved
                 ? "h-16 sm:h-32 md:h-48"
                 : "h-[180px] sm:h-[200px] md:h-[400px]",
