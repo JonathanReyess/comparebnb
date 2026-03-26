@@ -60,6 +60,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
           poster="/beach_landing_poster.jpg"
           className="absolute inset-0 w-full h-full object-cover scale-105"
         >
+          <source src="/beach_landing.webm" type="video/webm" />
           <source src="/beach_landing.mp4" type="video/mp4" />
         </video>
 

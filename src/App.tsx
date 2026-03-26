@@ -169,7 +169,8 @@ export default function App() {
     <div className={`min-h-screen text-gray-900 font-sans pb-20 transition-colors duration-500 ${step === 0 ? "bg-white" : "bg-transparent"}`}>
       {/* Persistent video background — always mounted so it's playing before step 0 → 1 transition */}
       <div className="fixed inset-0 z-[-1] overflow-hidden bg-gray-950">
-        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover scale-105">
+        <video autoPlay muted loop playsInline poster="/beach_landing_poster.jpg" className="absolute inset-0 w-full h-full object-cover scale-105">
+          <source src="/beach_landing.webm" type="video/webm" />
           <source src="/beach_landing.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gray-950/40 backdrop-blur-md" />
