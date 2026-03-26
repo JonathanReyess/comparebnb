@@ -31,7 +31,7 @@ export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
     >
       <div
         className={cn(
-          "mx-auto flex items-center justify-between transition-all duration-700 ease-in-out px-4 sm:px-10",
+          "mx-auto flex items-center justify-between transition-all duration-700 ease-in-out px-3 sm:px-6 lg:px-10",
           isMoved ? "max-w-full" : "max-w-7xl",
         )}
       >
@@ -41,8 +41,8 @@ export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
           className={cn(
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded transition-all duration-700 ease-in-out",
             isMoved
-              ? "transform translate-x-[-10px] sm:translate-x-[-20px]"
-              : "translate-x-0",
+              ? "transform translate-x-[-8px] sm:translate-x-[-14px] lg:translate-x-[-20px]"
+              : "lg:translate-x-[-60px]",
           )}
         >
           <img
@@ -58,8 +58,8 @@ export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
               "w-auto block outline-none border-none transition-all duration-700 ease-in-out",
               !isPastHero && "filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]",
               isMoved
-                ? "h-16 sm:h-32 md:h-48"
-                : "h-[180px] sm:h-[200px] md:h-[400px]",
+                ? "h-14 sm:h-20 md:h-32 lg:h-40 xl:h-48"
+                : "h-[160px] sm:h-[160px] md:h-[260px] lg:h-[340px] xl:h-[400px]",
             )}
           />
         </button>
@@ -67,7 +67,7 @@ export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
         {step === 0 && (
           <button
             onClick={onStartClick}
-            className="bg-white hover:bg-gray-100 text-gray-900 px-4 py-2 sm:px-6 sm:py-2.5 rounded-full font-semibold text-xs sm:text-sm transition-all shadow-lg whitespace-nowrap"
+            className="-translate-y-2 lg:-translate-y-3 -translate-x-4 sm:translate-x-0 bg-white hover:bg-gray-100 text-gray-900 px-3 py-1.5 sm:px-5 sm:py-2 lg:px-6 lg:py-2.5 rounded-full font-semibold text-[11px] sm:text-xs lg:text-sm transition-all shadow-lg whitespace-nowrap"
           >
             Start Comparing
           </button>
