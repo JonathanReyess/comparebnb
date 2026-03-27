@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Plus,
   Trash2,
@@ -5,8 +6,24 @@ import {
   ArrowRight,
   CheckCircle2,
   Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
+
+function validateListingUrl(url: string): string | null {
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    return "Please enter a valid URL.";
+  }
+  if (!parsed.searchParams.has("check_in") || !parsed.searchParams.has("check_out")) {
+    return "Link is missing check-in / check-out dates. Open the listing with your dates selected and paste the full URL.";
+  }
+  return null;
+}
 
 interface ListingsStepProps {
   listingInputs: string[];
@@ -29,8 +46,24 @@ export function ListingsStep({
   onSkip,
   isLoading,
 }: ListingsStepProps) {
+  const [touched, setTouched] = useState<boolean[]>(() =>
+    listingInputs.map(() => false)
+  );
+
+  const handleBlur = (index: number) => {
+    setTouched((prev) => {
+      const next = [...prev];
+      next[index] = true;
+      return next;
+    });
+  };
+
+  const syncedTouched = listingInputs.map((_, i) => touched[i] ?? false);
+  const errors = listingInputs.map((url) => validateListingUrl(url));
   const filledCount = listingInputs.filter((u) => u.trim().length > 10).length;
-  const canCompare = filledCount >= 2;
+  const canCompare =
+    filledCount >= 2 &&
+    listingInputs.every((u) => validateListingUrl(u) === null);
 
   return (
     <div className="relative min-h-[80vh] flex items-center justify-center w-full">
@@ -48,6 +81,8 @@ export function ListingsStep({
         <div className="space-y-6 mb-10">
           {listingInputs.map((input, index) => {
             const isFilled = input.trim().length > 10;
+            const error = errors[index];
+            const showError = syncedTouched[index] && error !== null;
 
             return (
               <div
@@ -59,25 +94,43 @@ export function ListingsStep({
                   <div
                     className={cn(
                       "absolute left-4 top-5 w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold transition-[background-color,color] duration-300 z-10",
-                      isFilled
-                        ? "bg-brand-100 text-brand-600 shadow-sm"
-                        : "bg-gray-100 text-gray-400 group-focus-within:bg-brand-100 group-focus-within:text-brand-600",
+                      showError
+                        ? "bg-red-100 text-red-500"
+                        : isFilled
+                          ? "bg-brand-100 text-brand-600 shadow-sm"
+                          : "bg-gray-100 text-gray-400 group-focus-within:bg-brand-100 group-focus-within:text-brand-600",
                     )}
                   >
-                    {isFilled ? <CheckCircle2 className="w-5 h-5" /> : index + 1}
+                    {showError ? (
+                      <AlertCircle className="w-5 h-5" />
+                    ) : isFilled ? (
+                      <CheckCircle2 className="w-5 h-5" />
+                    ) : (
+                      index + 1
+                    )}
                   </div>
 
                   <textarea
-                    placeholder="Paste an Airbnb link — e.g. airbnb.com/rooms/12345"
+                    placeholder="Paste an Airbnb link — e.g. airbnb.com/rooms/12345?check_in=…&check_out=…"
                     value={input}
                     onChange={(e) => onUpdate(index, e.target.value)}
+                    onBlur={() => handleBlur(index)}
                     className={cn(
                       "w-full pl-16 pr-4 py-5 rounded-2xl border outline-none transition-[border-color,background-color,box-shadow] duration-200 min-h-[100px] resize-none text-sm leading-relaxed",
-                      isFilled
-                        ? "border-brand-200 bg-brand-50/20 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
-                        : "border-gray-200 bg-gray-50/30 focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10",
+                      showError
+                        ? "border-red-300 bg-red-50/30 focus:border-red-400 focus:ring-4 focus:ring-red-400/10"
+                        : isFilled
+                          ? "border-brand-200 bg-brand-50/20 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+                          : "border-gray-200 bg-gray-50/30 focus:bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10",
                     )}
                   />
+
+                  {showError && (
+                    <p className="mt-2 text-xs text-red-500 flex items-start gap-1.5 pl-1">
+                      <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                      {error}
+                    </p>
+                  )}
                 </div>
 
                 {/* Delete button — only rendered when listings are removable */}
@@ -99,16 +152,22 @@ export function ListingsStep({
         </div>
 
         {/* Add listing button */}
-        <button
-          type="button"
-          onClick={onAdd}
-          className="w-full flex items-center justify-center gap-3 py-6 rounded-2xl border-2 border-dashed border-gray-200 text-gray-500 hover:border-brand-300 hover:text-brand-600 hover:bg-brand-50/30 transition-[color,border-color,background-color] font-semibold group"
-        >
-          <div className="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-brand-100 flex items-center justify-center transition-colors">
-            <Plus className="w-5 h-5" />
-          </div>
-          Add another listing
-        </button>
+        {listingInputs.length >= 5 ? (
+          <p className="w-full text-center py-4 text-sm text-gray-400">
+            Maximum of 5 listings reached.
+          </p>
+        ) : (
+          <button
+            type="button"
+            onClick={onAdd}
+            className="w-full flex items-center justify-center gap-3 py-6 rounded-2xl border-2 border-dashed border-gray-200 text-gray-500 hover:border-brand-300 hover:text-brand-600 hover:bg-brand-50/30 transition-[color,border-color,background-color] font-semibold group"
+          >
+            <div className="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-brand-100 flex items-center justify-center transition-colors">
+              <Plus className="w-5 h-5" />
+            </div>
+            Add another listing
+          </button>
+        )}
 
         {/* Navigation footer */}
         <div className="mt-12 flex items-center justify-between pt-8 border-t border-gray-100">

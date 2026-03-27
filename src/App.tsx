@@ -205,7 +205,7 @@ export default function App() {
               <ListingsStep
                 listingInputs={listingInputs}
                 onUpdate={(i, v) => { const next = [...listingInputs]; next[i] = v; setListingInputs(next); }}
-                onAdd={() => setListingInputs([...listingInputs, ""])}
+                onAdd={() => { if (listingInputs.length < 5) setListingInputs([...listingInputs, ""]); }}
                 onRemove={(i) => { if (listingInputs.length <= 2) return; setListingInputs(listingInputs.filter((_, idx) => idx !== i)); }}
                 onBack={() => goTo(1, true)}
                 onNext={handleListingsNext}

@@ -136,7 +136,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
       </section>
 
       {/* How it works */}
-      <section id="how-it-works" className="py-24 md:py-32 bg-gray-50">
+      <section id="how-it-works" className="py-24 md:py-32 bg-gray-50 -mt-px">
         <div className="max-w-5xl mx-auto px-6">
           <motion.div {...fadeUp()} className="mb-12 md:mb-16">
             <h2 className="font-display text-3xl md:text-4xl font-semibold text-gray-900 tracking-tight mb-3">
