@@ -1,4 +1,12 @@
-import { ArrowRight, Sparkles, Trophy } from "lucide-react";
+import {
+  ArrowRight,
+  Sparkles,
+  Trophy,
+  BarChart3,
+  Zap,
+  Check,
+  Link2,
+} from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 
 interface LandingPageProps {
@@ -14,10 +22,10 @@ export function LandingPage({ onStart }: LandingPageProps) {
     shouldReduce
       ? {}
       : {
-          initial: { opacity: 0, y: 20 },
+          initial: { opacity: 0, y: 24 },
           whileInView: { opacity: 1, y: 0 },
           viewport: { once: true, margin: "-60px" },
-          transition: { duration: 0.5, ease, delay },
+          transition: { duration: 0.55, ease, delay },
         };
 
   const staggerContainer = shouldReduce
@@ -28,7 +36,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
         viewport: { once: true, margin: "-60px" },
         variants: {
           hidden: {},
-          show: { transition: { staggerChildren: 0.12 } },
+          show: { transition: { staggerChildren: 0.11 } },
         },
       };
 
@@ -45,71 +53,232 @@ export function LandingPage({ onStart }: LandingPageProps) {
         },
       };
 
+  const tableRows = [
+    {
+      cat: "Total price (4 nights)",
+      a: "$1,840",
+      b: "$2,190",
+      winner: "a" as const,
+    },
+    { cat: "Bedrooms", a: "4", b: "4", winner: null },
+    { cat: "Pool", a: "No", b: "Yes", winner: "b" as const },
+    { cat: "Bathrooms", a: "3", b: "2", winner: "a" as const },
+    { cat: "Hot tub", a: "Yes", b: "No", winner: "a" as const },
+    {
+      cat: "Drive time from LA",
+      a: "1h 20m",
+      b: "6h 10m",
+      winner: "a" as const,
+    },
+    { cat: "Guest rating", a: "4.87 ★", b: "4.94 ★", winner: "b" as const },
+  ];
+
   return (
     <main className="w-full bg-white font-sans selection:bg-brand-100 selection:text-brand-900">
-      {/* Hero: full-screen video */}
-      <section className="relative h-[90vh] min-h-[600px] flex flex-col items-center justify-center overflow-hidden">
-        {/* Because your file is in the "public" folder, it is served at the root "/".
-          'muted' is required for 'autoPlay' and 'loop' to work in modern browsers.
-        */}
+      {/* ── Hero ──────────────────────────────────────────────── */}
+      <section className="relative h-screen flex flex-col overflow-hidden">
+        {/* Video background */}
         <video
           autoPlay
           muted
           loop
           playsInline
           poster="/beach_landing_poster.jpg"
-          className="absolute inset-0 w-full h-full object-cover scale-105"
+          className="absolute inset-0 w-full h-full object-cover scale-105 blur-sm"
         >
           <source src="/beach_landing.webm" type="video/webm" />
           <source src="/beach_landing.mp4" type="video/mp4" />
         </video>
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-950/75 via-gray-950/55 to-brand-900/50" />
 
-        {/* Deep, refined gradient for maximum text contrast over the moving video */}
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-950/60 via-gray-950/40 to-gray-950/80" />
+        {/* Content — padded to clear the decorative logo, capped by h-screen */}
+        <div className="relative z-10 flex-1 flex items-start">
+          <div className="w-full max-w-7xl mx-auto px-6 lg:px-10 pt-28 pb-16 md:pt-[170px] md:pb-20 lg:pt-[240px] lg:pb-24 xl:pt-[290px] xl:pb-28">
+            <div className="grid lg:grid-cols-[1fr_500px] xl:grid-cols-[1fr_580px] gap-10 xl:gap-14 items-start">
+              {/* Left — copy */}
+              <div>
+                <motion.h1
+                  initial={shouldReduce ? {} : { opacity: 0, y: 28 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.65, ease, delay: 0.1 }}
+                  className="font-display text-[2.75rem] sm:text-6xl lg:text-[4.5rem] xl:text-[5rem] font-semibold text-white tracking-tight leading-[1.05] mb-6"
+                >
+                  Stop tab-switching.
+                  <br />
+                  <span className="text-brand-300">Start booking.</span>
+                </motion.h1>
 
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto mt-12 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-medium mb-8">
-            <Sparkles className="w-4 h-4 text-brand-300" />
-            <span>AI-powered · Free · No signup</span>
-          </div>
+                <motion.p
+                  initial={shouldReduce ? {} : { opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease, delay: 0.25 }}
+                  className="text-white/70 text-lg sm:text-xl mb-10 max-w-lg leading-relaxed font-normal"
+                >
+                  Paste your Airbnb and VRBO links, choose what matters to your
+                  group, and get a side-by-side breakdown with an AI pick — in
+                  under two minutes.
+                </motion.p>
 
-          <h1 className="font-display text-5xl md:text-7xl font-semibold text-white tracking-tight leading-[1.1] mb-6 drop-shadow-md">
-            Stop guessing.
-            <br />
-            Start <span className="text-brand-300">comparing.</span>
-          </h1>
-          <p className="text-gray-300 text-xl md:text-2xl mb-12 max-w-xl mx-auto leading-relaxed font-normal drop-shadow-sm">
-            Paste your listings, pick what matters, and find the perfect match
-            in seconds.
-          </p>
-
-          {/* CTA — single, unambiguous action */}
-          <div className="flex flex-col items-center gap-4 w-full max-w-md mx-auto">
-            <button
-              onClick={onStart}
-              aria-label="Start comparing listings"
-              className="group w-full flex items-center justify-between bg-white rounded-2xl shadow-2xl shadow-black/20 hover:shadow-brand-500/20 transition-all border border-white/10 px-6 py-4 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/50 hover:scale-[1.015] duration-300"
-            >
-              <div className="text-left">
-                <p className="text-base font-bold text-gray-900 tracking-tight">
-                  Compare your listings
-                </p>
-                <p className="text-sm text-gray-400 mt-0.5">
-                  Airbnb · VRBO · Booking.com · more
-                </p>
+                <motion.div
+                  initial={shouldReduce ? {} : { opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.55, ease, delay: 0.38 }}
+                  className="flex flex-wrap items-center gap-3"
+                >
+                  <button
+                    onClick={onStart}
+                    className="group inline-flex items-center gap-2.5 bg-brand-500 hover:bg-brand-600 text-white px-7 py-3.5 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-brand-900/30 hover:-translate-y-px focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-400/40"
+                  >
+                    Get Started
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
+                  </button>
+                  <button
+                    onClick={() =>
+                      document
+                        .getElementById("how-it-works")
+                        ?.scrollIntoView({ behavior: "smooth" })
+                    }
+                    className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/20 px-7 py-3.5 rounded-xl font-semibold text-sm transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/30"
+                  >
+                    Learn More
+                  </button>
+                </motion.div>
               </div>
-              <div className="bg-brand-500 group-hover:bg-brand-600 text-white px-5 py-3 rounded-xl font-semibold text-sm transition-all shrink-0 ml-4 shadow-sm flex items-center gap-2">
-                Start free
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
-              </div>
-            </button>
-            <p className="text-white/50 text-xs font-medium">
-              Takes 2 minutes · No signup required
-            </p>
+
+              {/* Right — floating comparison card */}
+              <motion.div
+                initial={shouldReduce ? {} : { opacity: 0, y: 32, x: 12 }}
+                animate={{ opacity: 1, y: 0, x: 0 }}
+                transition={{ duration: 0.7, ease, delay: 0.25 }}
+                className="hidden lg:block"
+              >
+                <div className="bg-white rounded-2xl shadow-2xl shadow-black/30 border border-white/10 overflow-hidden">
+                  {/* Card header */}
+                  <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex w-2 h-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full w-2 h-2 bg-brand-500" />
+                      </span>
+                      <span className="text-xs font-semibold text-gray-500 tracking-wide uppercase">
+                        Comparing 2 listings
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full border border-gray-200">
+                      Sample
+                    </span>
+                  </div>
+
+                  {/* Table */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-left">
+                      <thead>
+                        <tr className="border-b border-gray-100 bg-gray-50/80">
+                          <th className="px-4 py-2.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest w-36 border-r border-gray-100">
+                            Category
+                          </th>
+                          <th className="px-4 py-2.5">
+                            <p className="font-semibold text-gray-900 text-xs">
+                              Coastal Retreat
+                            </p>
+                            <p className="text-[10px] text-gray-400 mt-0.5 font-normal">
+                              Malibu, CA · 4 bed
+                            </p>
+                          </th>
+                          <th className="px-4 py-2.5">
+                            <p className="font-semibold text-gray-900 text-xs">
+                              Lakeside Lodge
+                            </p>
+                            <p className="text-[10px] text-gray-400 mt-0.5 font-normal">
+                              Lake Tahoe · 4 bed
+                            </p>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {tableRows.map(({ cat, a, b, winner }, i) => (
+                          <tr
+                            key={cat}
+                            className={
+                              i % 2 === 0 ? "bg-white" : "bg-gray-50/40"
+                            }
+                          >
+                            <td className="px-4 py-2 text-xs font-medium text-gray-500 border-r border-gray-100 whitespace-nowrap">
+                              {cat}
+                            </td>
+                            <td
+                              className={`px-4 py-2 text-xs ${winner === "a" ? "bg-emerald-50/70" : ""}`}
+                            >
+                              <div className="flex items-center gap-1.5">
+                                <span
+                                  className={
+                                    winner === "a"
+                                      ? "font-semibold text-emerald-800"
+                                      : "text-gray-700"
+                                  }
+                                >
+                                  {a}
+                                </span>
+                                {winner === "a" && (
+                                  <div className="w-3.5 h-3.5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                    <Check
+                                      className="w-2 h-2 text-emerald-600"
+                                      strokeWidth={3}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td
+                              className={`px-4 py-2 text-xs ${winner === "b" ? "bg-emerald-50/70" : ""}`}
+                            >
+                              <div className="flex items-center gap-1.5">
+                                <span
+                                  className={
+                                    winner === "b"
+                                      ? "font-semibold text-emerald-800"
+                                      : "text-gray-700"
+                                  }
+                                >
+                                  {b}
+                                </span>
+                                {winner === "b" && (
+                                  <div className="w-3.5 h-3.5 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                    <Check
+                                      className="w-2 h-2 text-emerald-600"
+                                      strokeWidth={3}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* AI rec chip */}
+                  <div className="mx-4 my-3 bg-brand-50 rounded-xl p-3 flex items-center gap-3 border border-brand-100/60">
+                    <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold text-brand-700 uppercase tracking-wide">
+                        AI Recommendation
+                      </p>
+                      <p className="text-xs font-medium text-gray-700 mt-0.5">
+                        Coastal Retreat wins for your group
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
           </div>
         </div>
 
-        {/* Wave cutout — organic transition to gray-50 */}
+        {/* Wave transition */}
         <div
           className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none"
           aria-hidden="true"
@@ -120,13 +289,11 @@ export function LandingPage({ onStart }: LandingPageProps) {
             preserveAspectRatio="none"
             className="w-full h-24 md:h-36 block"
           >
-            {/* Back layer — offset phase, foam depth */}
             <path
               d="M0,70 C80,30 200,95 380,50 C520,18 630,85 800,55 C930,32 1030,88 1190,46 C1290,18 1380,68 1440,50 L1440,120 L0,120 Z"
               fill="#f9fafb"
               fillOpacity="0.55"
             />
-            {/* Main fill — irregular crests, ~55px amplitude */}
             <path
               d="M0,82 C60,42 165,105 325,65 C465,32 565,95 705,68 C825,45 940,92 1085,58 C1205,30 1345,82 1440,64 L1440,120 L0,120 Z"
               fill="#f9fafb"
@@ -135,246 +302,253 @@ export function LandingPage({ onStart }: LandingPageProps) {
         </div>
       </section>
 
-      {/* How it works */}
+      {/* ── Feature cards ─────────────────────────────────────── */}
       <section id="how-it-works" className="py-24 md:py-32 bg-gray-50 -mt-px">
-        <div className="max-w-5xl mx-auto px-6">
-          <motion.div {...fadeUp()} className="mb-12 md:mb-16">
-            <h2 className="font-display text-3xl md:text-4xl font-semibold text-gray-900 tracking-tight mb-3">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div {...fadeUp()} className="mb-14 md:mb-16">
+            <p className="text-brand-500 text-sm font-semibold tracking-wide uppercase mb-3">
               How it works
+            </p>
+            <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-900 tracking-tight leading-[1.1] mb-4 max-w-xl">
+              Everything you need for the perfect booking.
             </h2>
-            <p className="text-gray-500 text-lg leading-relaxed max-w-xl">
-              Three steps from spreadsheet-induced confusion to confident group
-              booking.
+            <p className="text-gray-500 text-lg leading-relaxed max-w-lg">
+              Three steps from a dozen open tabs to one confident group
+              decision.
             </p>
           </motion.div>
 
           <motion.div
-            className="divide-y divide-gray-200"
+            className="grid md:grid-cols-3 gap-6 lg:gap-8"
             {...staggerContainer}
           >
             {[
               {
-                num: "1",
-                title: "Tell us about your trip",
-                desc: "Enter your group size, travel method, and what matters most so we can tailor every comparison to your needs.",
+                icon: <Link2 className="w-5 h-5" />,
+                num: "01",
+                title: "Paste any listing link",
+                desc: "Drop in URLs from Airbnb, VRBO, Booking.com, or anywhere else. We handle the data extraction automatically.",
               },
               {
-                num: "2",
+                icon: <BarChart3 className="w-5 h-5" />,
+                num: "02",
                 title: "Choose your categories",
-                desc: "Pick from bedrooms, hot tubs, drive time, and more — or let our AI extract custom metrics from the listings.",
+                desc: "Pick from bedrooms, hot tubs, drive time, pricing, and more — or define custom metrics that matter to your group.",
               },
               {
-                num: "3",
-                title: "Compare & decide",
-                desc: "Paste your URLs and get a beautiful side-by-side table plus a personalized AI recommendation instantly.",
+                icon: <Zap className="w-5 h-5" />,
+                num: "03",
+                title: "Get your answer instantly",
+                desc: "A clean side-by-side table and a personalized AI recommendation tailored to your trip arrive in seconds.",
               },
-            ].map(({ num, title, desc }) => (
+            ].map(({ icon, num, title, desc }) => (
               <motion.div
                 key={num}
-                className="grid grid-cols-[64px_1fr] md:grid-cols-[120px_1fr] gap-6 md:gap-14 py-10 md:py-12 items-start"
                 {...staggerItem}
+                className="bg-white rounded-2xl p-7 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
               >
-                <span className="font-display text-6xl md:text-8xl font-semibold leading-none text-brand-200 select-none">
-                  {num}
-                </span>
-                <div className="pt-1 md:pt-3">
-                  <h3 className="font-display text-2xl md:text-3xl font-semibold text-gray-900 tracking-tight mb-3 leading-tight">
-                    {title}
-                  </h3>
-                  <p className="text-gray-500 text-base md:text-lg leading-relaxed max-w-lg">
-                    {desc}
-                  </p>
+                <div className="flex items-start justify-between mb-5">
+                  <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-500 flex items-center justify-center shrink-0">
+                    {icon}
+                  </div>
+                  <span className="font-display text-3xl font-semibold text-gray-100 select-none leading-none">
+                    {num}
+                  </span>
                 </div>
+                <h3 className="font-display text-xl font-semibold text-gray-900 tracking-tight mb-2 leading-snug">
+                  {title}
+                </h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
               </motion.div>
             ))}
-          </motion.div>
-
-          <motion.div {...fadeUp(0.1)} className="mt-14 md:mt-16">
-            <button
-              onClick={onStart}
-              className="bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-2xl font-semibold text-base transition-all inline-flex items-center gap-2 shadow-lg shadow-brand-200/50 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-500/30"
-            >
-              Start comparing <ArrowRight className="w-5 h-5" />
-            </button>
           </motion.div>
         </div>
       </section>
 
-      {/* Results preview */}
-      <section className="py-24 md:py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div {...fadeUp()} className="mb-12 md:mb-16 text-center">
-            <h2 className="font-display text-3xl md:text-4xl font-semibold text-gray-900 tracking-tight mb-3">
-              From 15 tabs to one clear winner
-            </h2>
-            <p className="text-gray-500 text-lg max-w-xl mx-auto leading-relaxed">
-              A side-by-side breakdown with an AI recommendation tailored to
-              your group's priorities — no spreadsheet required.
-            </p>
-          </motion.div>
+      {/* ── Feature section A: Compare side-by-side ───────────── */}
+      <section className="py-24 md:py-32 bg-white overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-14 xl:gap-20 items-center">
+            <motion.div {...fadeUp()}>
+              <p className="text-brand-500 text-sm font-semibold tracking-wide uppercase mb-3">
+                Side-by-side comparison
+              </p>
+              <h2 className="font-display text-3xl md:text-4xl font-semibold text-gray-900 tracking-tight leading-[1.1] mb-5">
+                From dozens of tabs to one clear winner.
+              </h2>
+              <p className="text-gray-500 text-lg leading-relaxed mb-8">
+                Every listing measured across the same categories so your group
+                can stop arguing and start packing.
+              </p>
+              <ul className="space-y-3 mb-10">
+                {[
+                  "Price, bedrooms, bathrooms, amenities — all in one row",
+                  "Drive time from your origin city calculated automatically",
+                  "Winners highlighted so the best option jumps out",
+                  "Paste up to 5 listings for a full group comparison",
+                ].map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 text-sm text-gray-600 leading-relaxed"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-brand-50 flex items-center justify-center shrink-0 mt-0.5">
+                      <Check
+                        className="w-3 h-3 text-brand-500"
+                        strokeWidth={2.5}
+                      />
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={onStart}
+                className="group inline-flex items-center gap-2 text-brand-500 hover:text-brand-600 font-semibold text-sm transition-colors"
+              >
+                Try it now
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
+              </button>
+            </motion.div>
 
-          <motion.div
-            className="bg-white rounded-3xl border border-gray-100 shadow-2xl shadow-gray-200/60 p-6 sm:p-8 md:p-10"
-            {...(shouldReduce
-              ? {}
-              : {
-                  initial: { opacity: 0, y: 40 },
-                  whileInView: { opacity: 1, y: 0 },
-                  viewport: { once: true, margin: "-80px" },
-                  transition: { duration: 0.65, ease },
-                })}
-          >
-            <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
-              <h3 className="font-display text-xl font-semibold text-gray-900">
-                Comparison
-              </h3>
-              <span className="text-xs font-medium text-gray-400 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
-                Sample preview
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-8 xl:gap-10">
-              {/* Table mockup */}
-              <div className="rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse text-left min-w-[460px]">
-                    <thead>
-                      <tr className="border-b border-gray-200 bg-gray-50/80">
-                        <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-40 border-r border-gray-200">
-                          Category
-                        </th>
-                        <th className="p-4 min-w-[180px]">
-                          <p className="font-semibold text-gray-900 text-sm">
-                            The Coastal Retreat
-                          </p>
-                          <p className="text-xs text-gray-400 mt-0.5 font-normal">
-                            Malibu, CA · 4 bed · 3 bath
-                          </p>
-                        </th>
-                        <th className="p-4 min-w-[180px]">
-                          <p className="font-semibold text-gray-900 text-sm">
-                            Lakeside Lodge
-                          </p>
-                          <p className="text-xs text-gray-400 mt-0.5 font-normal">
-                            Lake Tahoe, CA · 4 bed · 2 bath
-                          </p>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {(
-                        [
-                          {
-                            cat: "Total price (4 nights)",
-                            a: "$1,840",
-                            b: "$2,190",
-                            winner: "a",
-                          },
-                          { cat: "Bedrooms", a: "4", b: "4", winner: null },
-                          { cat: "Pool", a: "No", b: "Yes", winner: "b" },
-                          { cat: "Bathrooms", a: "3", b: "2", winner: "a" },
-                          { cat: "Hot tub", a: "Yes", b: "No", winner: "a" },
-                          {
-                            cat: "Drive time from LA",
-                            a: "1h 20m",
-                            b: "6h 10m",
-                            winner: "a",
-                          },
-                          {
-                            cat: "Guest rating",
-                            a: "4.87 ★",
-                            b: "4.94 ★",
-                            winner: "b",
-                          },
-                        ] as {
-                          cat: string;
-                          a: string;
-                          b: string;
-                          winner: "a" | "b" | null;
-                        }[]
-                      ).map(({ cat, a, b, winner }, i) => (
-                        <tr
-                          key={cat}
-                          className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}
-                        >
-                          <td className="p-4 text-sm font-medium text-gray-600 border-r border-gray-100 whitespace-nowrap">
-                            {cat}
-                          </td>
-                          <td
-                            className={`p-4 text-sm ${winner === "a" ? "bg-emerald-50/60" : ""}`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <span
-                                className={
-                                  winner === "a"
-                                    ? "font-medium text-emerald-800"
-                                    : "font-medium text-gray-800"
-                                }
-                              >
-                                {a}
-                              </span>
-                              {winner === "a" && (
-                                <div className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 shrink-0">
-                                  <svg
-                                    className="w-3 h-3"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth={3}
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M5 13l4 4L19 7"
-                                    />
-                                  </svg>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td
-                            className={`p-4 text-sm ${winner === "b" ? "bg-emerald-50/60" : ""}`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <span
-                                className={
-                                  winner === "b"
-                                    ? "font-medium text-emerald-800"
-                                    : "font-medium text-gray-800"
-                                }
-                              >
-                                {b}
-                              </span>
-                              {winner === "b" && (
-                                <div className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 shrink-0">
-                                  <svg
-                                    className="w-3 h-3"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth={3}
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M5 13l4 4L19 7"
-                                    />
-                                  </svg>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+            {/* Scattered card deck */}
+            <motion.div
+              {...(shouldReduce
+                ? {}
+                : {
+                    initial: { opacity: 0, x: 40 },
+                    whileInView: { opacity: 1, x: 0 },
+                    viewport: { once: true, margin: "-60px" },
+                    transition: { duration: 0.6, ease },
+                  })}
+              className="relative"
+            >
+              {/* Scattered pile */}
+              <div className="relative h-[460px]">
+                {[
+                  {
+                    name: "Mountain Cabin",
+                    loc: "Aspen, CO",
+                    price: "$620/night",
+                    rating: "4.91",
+                    photo: "/Gemini_Generated_Image_ocfndocfndocfndo.png",
+                    topPick: false,
+                    zIndex: 2,
+                    style: { left: -18, top: 55, transform: "rotate(-14deg)" },
+                  },
+                  {
+                    name: "Desert Hideaway",
+                    loc: "Scottsdale, AZ",
+                    price: "$310/night",
+                    rating: "4.78",
+                    photo: "/Gemini_Generated_Image_zbas2uzbas2uzbas.png",
+                    topPick: false,
+                    zIndex: 3,
+                    style: { left: 25, top: 200, transform: "rotate(-7deg)" },
+                  },
+                  {
+                    name: "Coastal Retreat",
+                    loc: "Malibu, CA",
+                    price: "$460/night",
+                    rating: "4.87",
+                    photo: "/Gemini_Generated_Image_93p9b193p9b193p9.png",
+                    topPick: true,
+                    zIndex: 6,
+                    style: {
+                      left: "calc(50% - 112px)",
+                      top: 0,
+                      transform: "rotate(-2deg)",
+                    },
+                  },
+                  {
+                    name: "Lakeside Lodge",
+                    loc: "Lake Tahoe, CA",
+                    price: "$548/night",
+                    rating: "4.94",
+                    photo: "/Gemini_Generated_Image_soawoqsoawoqsoaw.png",
+                    topPick: false,
+                    zIndex: 4,
+                    style: { right: -18, top: 35, transform: "rotate(11deg)" },
+                  },
+                  {
+                    name: "Big Sur Retreat",
+                    loc: "Big Sur, CA",
+                    price: "$710/night",
+                    rating: "4.96",
+                    photo: "/Gemini_Generated_Image_2e1fec2e1fec2e1f.png",
+                    topPick: false,
+                    zIndex: 5,
+                    style: { right: 10, top: 210, transform: "rotate(17deg)" },
+                  },
+                ].map((p) => (
+                  <motion.div
+                    key={p.name}
+                    className="absolute w-56 rounded-2xl overflow-hidden shadow-xl border-2 border-white bg-white hover:z-50 cursor-default"
+                    style={{
+                      ...(p.style as React.CSSProperties),
+                      zIndex: p.zIndex,
+                    }}
+                    initial={
+                      shouldReduce ? {} : { opacity: 0, scale: 0.88, y: 24 }
+                    }
+                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{
+                      duration: 0.45,
+                      ease,
+                      delay: (p.zIndex - 2) * 0.1,
+                    }}
+                  >
+                    <div className="h-36 relative overflow-hidden">
+                      <img
+                        src={p.photo}
+                        alt={p.name}
+                        className="w-full h-full object-cover"
+                      />
+                      {p.topPick && (
+                        <div className="absolute top-2 left-2 bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                          Our pick
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <p className="font-semibold text-gray-900 text-sm leading-tight truncate">
+                        {p.name}
+                      </p>
+                      <p className="text-gray-400 text-xs mt-0.5">{p.loc}</p>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-sm font-bold text-gray-900">
+                          {p.price}
+                        </p>
+                        <p className="text-xs text-gray-500">★ {p.rating}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
 
-              {/* AI Recommendation card */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-50 text-brand-500 shrink-0">
+      {/* ── Feature section B: AI recommendation ─────────────── */}
+      <section className="py-24 md:py-32 bg-gray-50 overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-14 xl:gap-20 items-center">
+            {/* AI rec card */}
+            <motion.div
+              {...(shouldReduce
+                ? {}
+                : {
+                    initial: { opacity: 0, x: -40 },
+                    whileInView: { opacity: 1, x: 0 },
+                    viewport: { once: true, margin: "-60px" },
+                    transition: { duration: 0.6, ease },
+                  })}
+              className="order-2 lg:order-1"
+            >
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-xl shadow-gray-200/60 p-6 sm:p-8">
+                <div className="flex items-center gap-2.5 mb-6">
+                  <div className="w-8 h-8 rounded-full bg-brand-50 text-brand-500 flex items-center justify-center shrink-0">
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <h3 className="font-display text-lg font-semibold text-gray-900">
@@ -382,13 +556,13 @@ export function LandingPage({ onStart }: LandingPageProps) {
                   </h3>
                 </div>
 
-                <div className="rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-50/80 via-white to-white p-6 shadow-sm">
-                  <div className="flex items-start gap-4 mb-5">
-                    <div className="w-12 h-12 rounded-xl bg-brand-500 flex items-center justify-center shrink-0 shadow-inner shadow-white/20">
-                      <Trophy className="w-6 h-6 text-white" />
+                <div className="rounded-2xl border border-brand-100 bg-gradient-to-br from-brand-50/80 via-white to-white p-5 shadow-sm mb-4">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="w-11 h-11 rounded-xl bg-brand-500 flex items-center justify-center shrink-0">
+                      <Trophy className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-brand-600 tracking-tight mb-1">
+                      <p className="text-[10px] font-semibold text-brand-500 tracking-wider uppercase mb-0.5">
                         Top pick
                       </p>
                       <p className="font-display text-base font-semibold text-gray-900 leading-tight">
@@ -396,38 +570,93 @@ export function LandingPage({ onStart }: LandingPageProps) {
                       </p>
                     </div>
                   </div>
-
-                  <p className="text-gray-700 leading-relaxed text-sm mb-5">
+                  <p className="text-gray-600 text-sm leading-relaxed mb-4">
                     For a group driving from LA, The Coastal Retreat wins where
                     it counts — $350 cheaper, an extra bathroom, a hot tub, and
-                    5 hours less in the car. Lakeside Lodge has the edge on
-                    guest rating (4.94 vs 4.87), but not enough to close the
-                    gap.
+                    5 hours less in the car.
                   </p>
-
                   <div className="rounded-xl bg-gray-50 border border-gray-100 p-4">
                     <p className="text-sm text-gray-600 leading-relaxed">
                       <span className="font-semibold text-gray-900 block mb-1">
                         Consider Lakeside Lodge if:
                       </span>
-                      Guest ratings are your group's top priority, or you'd
-                      prefer a mountain setting over the beach.
+                      Guest ratings are your top priority, or you'd prefer a
+                      mountain setting over the beach.
                     </p>
                   </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+
+            {/* Copy */}
+            <motion.div {...fadeUp()} className="order-1 lg:order-2">
+              <p className="text-brand-500 text-sm font-semibold tracking-wide uppercase mb-3">
+                AI-powered insight
+              </p>
+              <h2 className="font-display text-3xl md:text-4xl font-semibold text-gray-900 tracking-tight leading-[1.1] mb-5">
+                Find your home away from home.
+              </h2>
+              <p className="text-gray-500 text-lg leading-relaxed mb-8">
+                Our AI reads the comparison data and gives your group a clear,
+                reasoned recommendation based on your specific trip — not
+                generic advice.
+              </p>
+              <ul className="space-y-3 mb-10">
+                {[
+                  "Personalized to your group size, travel method, and priorities",
+                  "Generated from the same structured data shown in the table",
+                  "Includes a nuanced case for each listing, not just a winner",
+                  "Review summaries pulled directly from guest feedback",
+                ].map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 text-sm text-gray-600 leading-relaxed"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-brand-50 flex items-center justify-center shrink-0 mt-0.5">
+                      <Check
+                        className="w-3 h-3 text-brand-500"
+                        strokeWidth={2.5}
+                      />
+                    </div>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={onStart}
+                className="group inline-flex items-center gap-2 text-brand-500 hover:text-brand-600 font-semibold text-sm transition-colors"
+              >
+                See it in action
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />
+              </button>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Compatible platforms */}
+      {/* ── Compatible platforms ───────────────────────────────── */}
       <section className="py-16 bg-white border-y border-gray-100">
         <div className="max-w-5xl mx-auto px-6">
-          <p className="text-center text-xs font-semibold text-gray-400 tracking-tight mb-10">
+          <motion.p
+            {...fadeUp()}
+            className="text-center text-[10px] font-semibold text-gray-400 tracking-widest uppercase mb-10"
+          >
             Paste links from any of these platforms
-          </p>
-          <div className="flex items-center justify-center gap-10 md:gap-16 flex-wrap opacity-70">
+          </motion.p>
+          <motion.div
+            className="flex items-center justify-center gap-10 md:gap-16 flex-wrap opacity-60"
+            {...(shouldReduce
+              ? {}
+              : {
+                  initial: "hidden",
+                  whileInView: "show",
+                  viewport: { once: true, margin: "-40px" },
+                  variants: {
+                    hidden: {},
+                    show: { transition: { staggerChildren: 0.09 } },
+                  },
+                })}
+          >
             {[
               { src: "/airbnb.png", alt: "Airbnb" },
               { src: "/vrbo.png", alt: "VRBO" },
@@ -435,39 +664,34 @@ export function LandingPage({ onStart }: LandingPageProps) {
               { src: "/expedia.png", alt: "Expedia" },
               { src: "/hotels.png", alt: "Hotels.com" },
             ].map(({ src, alt }) => (
-              <img
+              <motion.img
                 key={alt}
                 src={src}
                 alt={alt}
-                className="h-7 md:h-8 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 hover:scale-105 cursor-pointer"
+                className="h-7 md:h-8 w-auto object-contain grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300 hover:scale-105 cursor-pointer"
+                {...(shouldReduce
+                  ? {}
+                  : {
+                      variants: {
+                        hidden: { opacity: 0, y: 12 },
+                        show: {
+                          opacity: 1,
+                          y: 0,
+                          transition: { duration: 0.4, ease },
+                        },
+                      },
+                    })}
               />
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-950">
-        <div className="max-w-5xl mx-auto px-6 py-20 text-center">
-          <p className="font-display text-2xl md:text-3xl font-medium text-white/70 leading-snug max-w-xl mx-auto mb-10">
-            Made for groups who hate spreadsheets and decision paralysis.
-          </p>
-
-          {/* Fixed-height wrapper prevents layout shift while image scales */}
-          <div className="h-12 flex items-center justify-center">
-            <img
-              src="/compare_white.svg"
-              alt="CompareBnB"
-              className="h-64 w-auto object-contain opacity-30 pointer-events-none"
-            />
-          </div>
-        </div>
-
-        <div className="border-t border-gray-800/50">
-          <div className="max-w-5xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-medium text-gray-600">
-            <p>© {new Date().getFullYear()} CompareBnB</p>
-            <p>Not affiliated with Airbnb, Inc.</p>
-          </div>
+      {/* ── Footer ────────────────────────────────────────────── */}
+      <footer className="bg-gray-950 border-t border-gray-800/50">
+        <div className="max-w-5xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-medium text-gray-400">
+          <p>© {new Date().getFullYear()} comparebnb</p>
+          <p>Not affiliated with Airbnb, Inc.</p>
         </div>
       </footer>
     </main>

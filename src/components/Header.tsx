@@ -10,13 +10,20 @@ interface HeaderProps {
 export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isPastHero, setIsPastHero] = useState(false);
+  const [showNavCta, setShowNavCta] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
       setIsPastHero(window.scrollY > window.innerHeight * 0.75);
+      const howItWorks = document.getElementById("how-it-works");
+      if (howItWorks) {
+        setShowNavCta(
+          howItWorks.getBoundingClientRect().top <= window.innerHeight * 0.3,
+        );
+      }
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -67,7 +74,12 @@ export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
         {step === 0 && (
           <button
             onClick={onStartClick}
-            className="-translate-y-2 lg:-translate-y-3 -translate-x-4 sm:translate-x-0 bg-white hover:bg-gray-100 text-gray-900 px-3 py-1.5 sm:px-5 sm:py-2 lg:px-6 lg:py-2.5 rounded-full font-semibold text-[11px] sm:text-xs lg:text-sm transition-all shadow-lg whitespace-nowrap"
+            className={cn(
+              "-translate-y-2 lg:-translate-y-3 -translate-x-4 sm:translate-x-0 bg-brand-500 hover:bg-brand-600 text-white px-3 py-1.5 sm:px-5 sm:py-2 lg:px-6 lg:py-2.5 rounded-full font-semibold text-[11px] sm:text-xs lg:text-sm transition-all duration-300 shadow-lg whitespace-nowrap",
+              showNavCta
+                ? "opacity-100 translate-y-0 pointer-events-auto"
+                : "opacity-0 -translate-y-1 pointer-events-none",
+            )}
           >
             Start Comparing
           </button>
