@@ -219,7 +219,7 @@ export function CategoriesStep({
           <button
             type="button"
             onClick={onNext}
-            className="flex items-center gap-2 px-8 py-3 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-bold transition-[background-color,transform,box-shadow] hover:-translate-y-0.5 active:translate-y-0 shadow-lg shadow-brand-200"
+            className="flex items-center gap-2 px-5 py-3 sm:px-8 text-sm sm:text-base rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-bold transition-[background-color,transform,box-shadow] hover:-translate-y-0.5 active:translate-y-0 shadow-lg shadow-brand-200"
           >
             Compare Listings <ArrowRight className="w-5 h-5" />
           </button>

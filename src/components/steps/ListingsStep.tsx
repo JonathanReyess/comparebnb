@@ -195,7 +195,7 @@ export function ListingsStep({
               onClick={onNext}
               disabled={!canCompare || isLoading}
               className={cn(
-                "flex items-center gap-2 px-10 py-4 rounded-2xl font-bold text-white transition-[color,background-color,transform,box-shadow] shadow-lg",
+                "flex items-center gap-2 px-5 py-3 sm:px-10 sm:py-4 text-sm sm:text-base rounded-2xl font-bold text-white transition-[color,background-color,transform,box-shadow] shadow-lg",
                 canCompare && !isLoading
                   ? "bg-brand-500 hover:bg-brand-600 hover:-translate-y-0.5 active:translate-y-0 shadow-brand-200"
                   : "bg-gray-300 cursor-not-allowed shadow-none",

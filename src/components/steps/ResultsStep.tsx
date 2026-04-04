@@ -13,7 +13,7 @@ import {
   Share2,
   Image,
 } from "lucide-react";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import {
   Category,
   CategoryType,
@@ -106,6 +106,7 @@ export function ResultsStep({
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatTriggered, setChatTriggered] = useState(false);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const [isSavingPng, setIsSavingPng] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatSentinelRef = useRef<HTMLDivElement>(null);
   const tableCardRef = useRef<HTMLDivElement>(null);
@@ -246,11 +247,15 @@ export function ResultsStep({
   const saveAsPng = async () => {
     if (!tableCardRef.current) return;
     setExportMenuOpen(false);
-    // Small delay so dropdown overlay is removed before capture
-    await new Promise((r) => setTimeout(r, 100));
+    setIsSavingPng(true);
+    await new Promise((r) => setTimeout(r, 150));
+    // Hide scrollbar on the overflow container before capture
+    const scrollEl = tableCardRef.current.querySelector<HTMLElement>(".overflow-x-auto");
+    const prevOverflow = scrollEl?.style.overflow ?? "";
+    if (scrollEl) scrollEl.style.overflow = "visible";
+
     try {
-      const canvas = await html2canvas(tableCardRef.current, { useCORS: true, scale: 2, logging: false });
-      const url = canvas.toDataURL("image/png");
+      const url = await toPng(tableCardRef.current, { pixelRatio: 2 });
       const a = document.createElement("a");
       a.href = url;
       a.download = "comparebnb-table.png";
@@ -259,6 +264,9 @@ export function ResultsStep({
       document.body.removeChild(a);
     } catch (err) {
       console.error("PNG export failed:", err);
+    } finally {
+      if (scrollEl) scrollEl.style.overflow = prevOverflow;
+      setIsSavingPng(false);
     }
   };
 
@@ -283,9 +291,11 @@ export function ResultsStep({
               <button
                 type="button"
                 onClick={() => setExportMenuOpen((o) => !o)}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 transition-all shadow-sm"
+                disabled={isSavingPng}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Share2 className="w-4 h-4" /> Export
+                {isSavingPng ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
+                {isSavingPng ? "Saving…" : "Export"}
               </button>
               {exportMenuOpen && (
                 <>
@@ -450,14 +460,14 @@ export function ResultsStep({
                   <tr className="border-b border-gray-200 bg-gray-50/80">
                     <th
                       scope="col"
-                      className="sticky left-0 z-20 bg-gray-50 p-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-48 border-r border-gray-200 shadow-[1px_0_0_0_rgba(0,0,0,0.05)]"
+                      className="sticky left-0 z-20 bg-gray-50 p-2 sm:p-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-32 sm:w-48 border-r border-gray-200 shadow-[1px_0_0_0_rgba(0,0,0,0.05)]"
                     >
-                      Category
+                      <div className="truncate">Category</div>
                     </th>
                     {sortedIndices.map((origIdx) => {
                       const h = listingHeaders[origIdx];
                       return (
-                        <th key={origIdx} scope="col" className="p-4 w-[240px]">
+                        <th key={origIdx} scope="col" className="p-2 sm:p-4 w-[180px] sm:w-[240px]">
                           {h.coverImage && (
                             <img
                               src={h.coverImage}
@@ -501,11 +511,11 @@ export function ResultsStep({
                         <th
                           scope="row"
                           className={cn(
-                            "sticky left-0 z-10 p-4 text-sm font-medium text-gray-600 border-r border-gray-100 whitespace-nowrap shadow-[1px_0_0_0_rgba(0,0,0,0.05)]",
+                            "sticky left-0 z-10 p-2 sm:p-4 text-xs sm:text-sm font-medium text-gray-600 border-r border-gray-100 max-w-[128px] sm:max-w-[192px] shadow-[1px_0_0_0_rgba(0,0,0,0.05)]",
                             stickyBg,
                           )}
                         >
-                          {cat.label}
+                          <div className="truncate">{cat.label}</div>
                         </th>
                         {sortedIndices.map((origIdx) => {
                           const value =
@@ -520,7 +530,7 @@ export function ResultsStep({
                             <td
                               key={origIdx}
                               className={cn(
-                                "p-4 text-sm transition-colors duration-200",
+                                "p-2 sm:p-4 text-xs sm:text-sm transition-colors duration-200",
                                 isWinner ? "bg-emerald-50/60" : "",
                               )}
                             >
