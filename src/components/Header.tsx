@@ -52,23 +52,24 @@ export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
               : "lg:translate-x-[-60px]",
           )}
         >
-          <img
-            src={
-              !isMoved
-                ? "/compare_white.svg"
-                : isPastHero
-                  ? "/blue_comp_xs.svg"
-                  : "/white_comp_xs.svg"
-            }
-            alt="CompareBnB"
-            className={cn(
-              "w-auto block outline-none border-none transition-all duration-700 ease-in-out",
-              !isPastHero && "filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]",
-              isMoved
-                ? "h-14 sm:h-20 md:h-32 lg:h-40 xl:h-48"
-                : "h-[160px] sm:h-[160px] md:h-[260px] lg:h-[340px] xl:h-[400px]",
-            )}
-          />
+          <div className={cn(!isPastHero && "filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]")}>
+            <img
+              src={
+                !isMoved
+                  ? "/compare_white.svg"
+                  : isPastHero
+                    ? "/blue_comp_xs.svg"
+                    : "/white_comp_xs.svg"
+              }
+              alt="CompareBnB"
+              className={cn(
+                "w-auto block outline-none border-none transition-all duration-700 ease-in-out",
+                isMoved
+                  ? "h-14 sm:h-20 md:h-32 lg:h-40 xl:h-48"
+                  : "h-[160px] sm:h-[160px] md:h-[260px] lg:h-[340px] xl:h-[400px]",
+              )}
+            />
+          </div>
         </button>
 
         {step === 0 && (

@@ -7,6 +7,7 @@ import {
   Check,
   Link2,
 } from "lucide-react";
+import { useState, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
 interface LandingPageProps {
@@ -15,6 +16,12 @@ interface LandingPageProps {
 
 export function LandingPage({ onStart }: LandingPageProps) {
   const shouldReduce = useReducedMotion();
+  const [cardZIndices, setCardZIndices] = useState<Record<string, number>>({});
+  const zCounter = useRef(10);
+  const bringToFront = (name: string) => {
+    zCounter.current += 1;
+    setCardZIndices((prev) => ({ ...prev, [name]: zCounter.current }));
+  };
 
   const ease = [0.25, 1, 0.5, 1] as [number, number, number, number];
 
@@ -76,7 +83,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
   return (
     <main className="w-full bg-white font-sans selection:bg-brand-100 selection:text-brand-900">
       {/* ── Hero ──────────────────────────────────────────────── */}
-      <section className="relative h-screen flex flex-col overflow-hidden">
+      <section className="relative min-h-screen flex flex-col overflow-hidden">
         {/* Video background */}
         <video
           autoPlay
@@ -93,7 +100,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
 
         {/* Content — padded to clear the decorative logo, capped by h-screen */}
         <div className="relative z-10 flex-1 flex items-start">
-          <div className="w-full max-w-7xl mx-auto px-6 lg:px-10 pt-28 pb-16 md:pt-[170px] md:pb-20 lg:pt-[240px] lg:pb-24 xl:pt-[290px] xl:pb-28">
+          <div className="w-full max-w-7xl mx-auto px-6 lg:px-10 pt-[14vh] pb-[8vh] md:pt-[19vh] md:pb-[9vh] lg:pt-[27vh] lg:pb-[11vh] xl:pt-[29vh] xl:pb-[11vh]">
             <div className="grid lg:grid-cols-[1fr_500px] xl:grid-cols-[1fr_580px] gap-10 xl:gap-14 items-start">
               {/* Left — copy */}
               <div>
@@ -150,7 +157,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
                 initial={shouldReduce ? {} : { opacity: 0, y: 32, x: 12 }}
                 animate={{ opacity: 1, y: 0, x: 0 }}
                 transition={{ duration: 0.7, ease, delay: 0.25 }}
-                className="hidden lg:block"
+                className="block min-w-0"
               >
                 <div className="bg-white rounded-2xl shadow-2xl shadow-black/30 border border-white/10 overflow-hidden">
                   {/* Card header */}
@@ -313,8 +320,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
               Everything you need for the perfect booking.
             </h2>
             <p className="text-gray-500 text-lg leading-relaxed max-w-lg">
-              Three steps from a dozen open tabs to one confident group
-              decision.
+              Three steps towards one confident group decision.
             </p>
           </motion.div>
 
@@ -433,7 +439,8 @@ export function LandingPage({ onStart }: LandingPageProps) {
                     photo: "/Gemini_Generated_Image_ocfndocfndocfndo.png",
                     topPick: false,
                     zIndex: 2,
-                    style: { left: -18, top: 55, transform: "rotate(-14deg)" },
+                    rotate: -14,
+                    style: { left: -18, top: 55 },
                   },
                   {
                     name: "Desert Hideaway",
@@ -443,7 +450,8 @@ export function LandingPage({ onStart }: LandingPageProps) {
                     photo: "/Gemini_Generated_Image_zbas2uzbas2uzbas.png",
                     topPick: false,
                     zIndex: 3,
-                    style: { left: 25, top: 200, transform: "rotate(-7deg)" },
+                    rotate: -7,
+                    style: { left: 25, top: 200 },
                   },
                   {
                     name: "Coastal Retreat",
@@ -453,11 +461,8 @@ export function LandingPage({ onStart }: LandingPageProps) {
                     photo: "/Gemini_Generated_Image_93p9b193p9b193p9.png",
                     topPick: true,
                     zIndex: 6,
-                    style: {
-                      left: "calc(50% - 112px)",
-                      top: 0,
-                      transform: "rotate(-2deg)",
-                    },
+                    rotate: -2,
+                    style: { left: "calc(50% - 112px)", top: 0 },
                   },
                   {
                     name: "Lakeside Lodge",
@@ -467,7 +472,8 @@ export function LandingPage({ onStart }: LandingPageProps) {
                     photo: "/Gemini_Generated_Image_soawoqsoawoqsoaw.png",
                     topPick: false,
                     zIndex: 4,
-                    style: { right: -18, top: 35, transform: "rotate(11deg)" },
+                    rotate: 11,
+                    style: { right: -18, top: 35 },
                   },
                   {
                     name: "Big Sur Retreat",
@@ -477,15 +483,16 @@ export function LandingPage({ onStart }: LandingPageProps) {
                     photo: "/Gemini_Generated_Image_2e1fec2e1fec2e1f.png",
                     topPick: false,
                     zIndex: 5,
-                    style: { right: 10, top: 210, transform: "rotate(17deg)" },
+                    rotate: 17,
+                    style: { right: 10, top: 210 },
                   },
                 ].map((p) => (
                   <motion.div
                     key={p.name}
-                    className="absolute w-56 rounded-2xl overflow-hidden shadow-xl border-2 border-white bg-white hover:z-50 cursor-default"
+                    className="absolute"
                     style={{
                       ...(p.style as React.CSSProperties),
-                      zIndex: p.zIndex,
+                      zIndex: cardZIndices[p.name] ?? p.zIndex,
                     }}
                     initial={
                       shouldReduce ? {} : { opacity: 0, scale: 0.88, y: 24 }
@@ -498,30 +505,41 @@ export function LandingPage({ onStart }: LandingPageProps) {
                       delay: (p.zIndex - 2) * 0.1,
                     }}
                   >
-                    <div className="h-36 relative overflow-hidden">
-                      <img
-                        src={p.photo}
-                        alt={p.name}
-                        className="w-full h-full object-cover"
-                      />
-                      {p.topPick && (
-                        <div className="absolute top-2 left-2 bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
-                          Our pick
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <p className="font-semibold text-gray-900 text-sm leading-tight truncate">
-                        {p.name}
-                      </p>
-                      <p className="text-gray-400 text-xs mt-0.5">{p.loc}</p>
-                      <div className="flex items-center justify-between mt-2">
-                        <p className="text-sm font-bold text-gray-900">
-                          {p.price}
-                        </p>
-                        <p className="text-xs text-gray-500">★ {p.rating}</p>
+                    <motion.div
+                      drag
+                      dragMomentum={false}
+                      onClick={() => bringToFront(p.name)}
+                      onDragStart={() => bringToFront(p.name)}
+                      className="w-56 rounded-2xl overflow-hidden shadow-xl border-2 border-white bg-white cursor-grab active:cursor-grabbing select-none"
+                      style={{ rotate: p.rotate }}
+                      whileDrag={{ scale: 1.05 }}
+                    >
+                      <div className="h-36 relative overflow-hidden">
+                        <img
+                          src={p.photo}
+                          alt={p.name}
+                          draggable={false}
+                          className="w-full h-full object-cover"
+                        />
+                        {p.topPick && (
+                          <div className="absolute top-2 left-2 bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                            Our pick
+                          </div>
+                        )}
                       </div>
-                    </div>
+                      <div className="p-4">
+                        <p className="font-semibold text-gray-900 text-sm leading-tight truncate">
+                          {p.name}
+                        </p>
+                        <p className="text-gray-400 text-xs mt-0.5">{p.loc}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <p className="text-sm font-bold text-gray-900">
+                            {p.price}
+                          </p>
+                          <p className="text-xs text-gray-500">★ {p.rating}</p>
+                        </div>
+                      </div>
+                    </motion.div>
                   </motion.div>
                 ))}
               </div>
