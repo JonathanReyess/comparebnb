@@ -18,6 +18,7 @@ export interface TripDetails {
 export interface ListingDetails {
   title: string;
   description: string;
+  cover_image: string | null;
   room_type: string;
   person_capacity: number;
   is_super_host: boolean;

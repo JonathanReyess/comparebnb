@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { TripDetails } from "../../types";
 import {
   Users,
@@ -12,6 +12,7 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 
 interface TripDetailsStepProps {
   tripDetails: TripDetails;
@@ -22,13 +23,80 @@ interface TripDetailsStepProps {
 const sharedFieldClass =
   "w-full rounded-2xl border border-gray-200 bg-gray-50/30 focus:bg-white focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 outline-none transition-[color,border-color,background-color,box-shadow] placeholder:text-gray-400";
 
+setOptions({
+  key: import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string,
+  v: "weekly",
+});
+
+interface Suggestion {
+  placePrediction: { text: { text: string }; placeId: string };
+}
+
 export function TripDetailsStep({
   tripDetails,
   onChange,
   onNext,
 }: TripDetailsStepProps) {
   const [triedToContinue, setTriedToContinue] = useState(false);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const originRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLUListElement>(null);
+
+  const fetchSuggestions = useCallback(
+    async (input: string) => {
+      if (!input.trim() || input.length < 2) {
+        setSuggestions([]);
+        return;
+      }
+
+      try {
+        const { AutocompleteSuggestion } = await importLibrary("places");
+        const { suggestions: results } =
+          await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+            input,
+            includedPrimaryTypes: tripDetails.travelMethod === "flying" ? ["airport"] : undefined,
+          });
+
+        setSuggestions(results ?? []);
+        setShowSuggestions(true);
+        setActiveSuggestion(-1);
+      } catch (err) {
+        console.error("Autocomplete error:", err);
+        setSuggestions([]);
+      }
+    },
+    [tripDetails.travelMethod]
+  );
+
+  const handleOriginChange = (value: string) => {
+    onChange({ ...tripDetails, origin: value });
+    fetchSuggestions(value);
+  };
+
+  const selectSuggestion = (text: string) => {
+    onChange({ ...tripDetails, origin: text });
+    setSuggestions([]);
+    setShowSuggestions(false);
+    setActiveSuggestion(-1);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveSuggestion((prev) => Math.min(prev + 1, suggestions.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveSuggestion((prev) => Math.max(prev - 1, -1));
+    } else if (e.key === "Enter" && activeSuggestion >= 0) {
+      e.preventDefault();
+      selectSuggestion(suggestions[activeSuggestion].placePrediction.text.text);
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+    }
+  };
 
   const updatePeople = (val: number) => {
     onChange({
@@ -125,7 +193,7 @@ export function TripDetailsStep({
                     key={method}
                     type="button"
                     onClick={() =>
-                      onChange({ ...tripDetails, travelMethod: method })
+                      onChange({ ...tripDetails, travelMethod: method, origin: "" })
                     }
                     className={cn(
                       "relative z-10 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200",
@@ -155,24 +223,55 @@ export function TripDetailsStep({
                 : "Destination Airport"}
               <span className="text-brand-500" aria-hidden="true"></span>
             </label>
-            <input
-              ref={originRef}
-              type="text"
-              placeholder={
-                tripDetails.travelMethod === "driving"
-                  ? "e.g. Durham, NC or Bay Area, CA"
-                  : "e.g. JFK, LAX, or SFO"
-              }
-              value={tripDetails.origin}
-              onChange={(e) =>
-                onChange({ ...tripDetails, origin: e.target.value })
-              }
-              className={cn(
-                sharedFieldClass,
-                "pl-5 pr-4 py-4",
-                triedToContinue && !isComplete && "border-amber-400",
+            <div className="relative">
+              <input
+                ref={originRef}
+                type="text"
+                autoComplete="off"
+                placeholder={
+                  tripDetails.travelMethod === "driving"
+                    ? "e.g. Durham, NC or Bay Area, CA"
+                    : "e.g. JFK, LAX, or SFO"
+                }
+                value={tripDetails.origin}
+                onChange={(e) => handleOriginChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                className={cn(
+                  sharedFieldClass,
+                  "pl-5 pr-4 py-4",
+                  triedToContinue && !isComplete && "border-amber-400",
+                )}
+              />
+              {showSuggestions && suggestions.length > 0 && (
+                <ul
+                  ref={suggestionsRef}
+                  className="absolute z-50 left-0 right-0 mt-1.5 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden"
+                >
+                  {suggestions.map((s, i) => (
+                    <li key={s.placePrediction.placeId}>
+                      <button
+                        type="button"
+                        onMouseDown={() =>
+                          selectSuggestion(s.placePrediction.text.text)
+                        }
+                        className={cn(
+                          "w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors",
+                          i === activeSuggestion
+                            ? "bg-brand-50 text-brand-700"
+                            : "text-gray-700 hover:bg-gray-50",
+                          i > 0 && "border-t border-gray-100",
+                        )}
+                      >
+                        <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                        {s.placePrediction.text.text}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
-            />
+            </div>
           </div>
 
           {/* Purpose + Priorities */}

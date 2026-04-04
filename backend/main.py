@@ -127,9 +127,13 @@ def optimize_listing_for_llm(raw_data: dict) -> dict:
         .get("hostRatingStats", {}).get("ratingAverage")
     )
 
+    images = raw_data.get("images", [])
+    cover_image = images[0].get("url") if images else None
+
     optimized = {
         "title": raw_data.get("title", ""),
         "description": raw_data.get("description", ""),
+        "cover_image": cover_image,
         "room_type": raw_data.get("room_type", ""),
         "is_super_host": raw_data.get("is_super_host", False),
         "is_guest_favorite": raw_data.get("is_guest_favorite", False),

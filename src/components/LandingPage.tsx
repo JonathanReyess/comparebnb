@@ -522,7 +522,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
                           className="w-full h-full object-cover"
                         />
                         {p.topPick && (
-                          <div className="absolute top-2 left-2 bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                          <div className="absolute top-2 right-2 bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
                             Our pick
                           </div>
                         )}
@@ -676,30 +676,31 @@ export function LandingPage({ onStart }: LandingPageProps) {
                 })}
           >
             {[
-              { src: "/airbnb.png", alt: "Airbnb" },
-              { src: "/vrbo.png", alt: "VRBO" },
-              { src: "/booking.png", alt: "Booking.com" },
-              { src: "/expedia.png", alt: "Expedia" },
-              { src: "/hotels.png", alt: "Hotels.com" },
-            ].map(({ src, alt }) => (
-              <motion.img
-                key={alt}
-                src={src}
-                alt={alt}
-                className="h-7 md:h-8 w-auto object-contain grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300 hover:scale-105 cursor-pointer"
-                {...(shouldReduce
-                  ? {}
-                  : {
-                      variants: {
-                        hidden: { opacity: 0, y: 12 },
-                        show: {
-                          opacity: 1,
-                          y: 0,
-                          transition: { duration: 0.4, ease },
+              { src: "/airbnb.png", alt: "Airbnb", href: "https://www.airbnb.com" },
+              { src: "/vrbo.png", alt: "VRBO", href: "https://www.vrbo.com" },
+              { src: "/booking.png", alt: "Booking.com", href: "https://www.booking.com" },
+              { src: "/expedia.png", alt: "Expedia", href: "https://www.expedia.com" },
+              { src: "/hotels.png", alt: "Hotels.com", href: "https://www.hotels.com" },
+            ].map(({ src, alt, href }) => (
+              <a key={alt} href={href} target="_blank" rel="noopener noreferrer">
+                <motion.img
+                  src={src}
+                  alt={alt}
+                  className="h-7 md:h-8 w-auto object-contain grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300 hover:scale-105"
+                  {...(shouldReduce
+                    ? {}
+                    : {
+                        variants: {
+                          hidden: { opacity: 0, y: 12 },
+                          show: {
+                            opacity: 1,
+                            y: 0,
+                            transition: { duration: 0.4, ease },
+                          },
                         },
-                      },
-                    })}
-              />
+                      })}
+                />
+              </a>
             ))}
           </motion.div>
         </div>

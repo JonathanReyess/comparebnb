@@ -57,7 +57,7 @@ export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
               src={
                 !isMoved
                   ? "/compare_white.svg"
-                  : isPastHero
+                  : isPastHero && step !== 4
                     ? "/blue_comp_xs.svg"
                     : "/white_comp_xs.svg"
               }

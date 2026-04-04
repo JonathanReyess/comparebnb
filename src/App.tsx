@@ -239,6 +239,7 @@ export default function App() {
                   .map((url, i) => ({
                     title: scrapedListingsData[i]?.details?.title ?? `Listing ${i + 1}`,
                     url,
+                    coverImage: scrapedListingsData[i]?.details?.cover_image ?? null,
                     reviewComments: scrapedListingsData[i]?.details?.review_comments ?? [],
                   }))}
                 tripDetails={tripDetails}

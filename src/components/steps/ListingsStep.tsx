@@ -204,7 +204,7 @@ export function ListingsStep({
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Fetching listing details…
+                  Fetching…
                 </>
               ) : (
                 <>
