@@ -35,6 +35,7 @@ interface ListingHeader {
 interface ResultsStepProps {
   selectedCategories: Category[];
   listingHeaders: ListingHeader[];
+  listingUrls: string[];
   fillResult: FillResult | null;
   isComparing: boolean;
   reviewSummaries: (string | null | undefined)[];
@@ -89,6 +90,7 @@ const SUGGESTED_QUESTIONS = [
 export function ResultsStep({
   selectedCategories,
   listingHeaders,
+  listingUrls,
   fillResult,
   isComparing,
   reviewSummaries,
@@ -98,6 +100,7 @@ export function ResultsStep({
   tripDetails,
   listingDetails,
 }: ResultsStepProps) {
+
   const [expandedReviews, setExpandedReviews] = useState<Set<number>>(new Set());
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);

@@ -2,12 +2,14 @@ import os
 import re
 import json
 from pathlib import Path
-from datetime import date
+from datetime import date, datetime, timezone
 from urllib.parse import urlparse, parse_qs
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
+import stripe
+from supabase import create_client, Client as SupabaseClient
 import pyairbnb
 from geopy.geocoders import Nominatim
 import google.genai as genai
@@ -16,6 +18,17 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 app = FastAPI()
+
+# Stripe
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+STRIPE_CREDITS_PRICE_ID = os.getenv("STRIPE_CREDITS_PRICE_ID", "")
+STRIPE_SUB_PRICE_ID = os.getenv("STRIPE_SUB_PRICE_ID", "")
+
+# Supabase (service role — backend only)
+_supabase_url = os.getenv("SUPABASE_URL", "")
+_supabase_service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+supabase_admin: SupabaseClient = create_client(_supabase_url, _supabase_service_key)
 
 _raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173")
 _allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
@@ -536,3 +549,86 @@ Assistant:"""
         return {"answer": response.text.strip()}
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Ask failed: {str(e)}")
+
+# ── Stripe ────────────────────────────────────────────────────────────────────
+
+class CheckoutRequest(BaseModel):
+    price_id: str
+    user_id: str
+    mode: str  # "payment" | "subscription"
+
+@app.post("/create-checkout-session")
+async def create_checkout_session(req: CheckoutRequest, request: Request):
+    raw_url = os.getenv("APP_URL", "")
+    # Fall back to request origin if APP_URL is a placeholder or missing
+    if not raw_url or not raw_url.startswith("http"):
+        origin = request.headers.get("origin", "")
+        raw_url = origin if origin.startswith("http") else "http://localhost:5173"
+    app_url = raw_url.rstrip("/")
+    try:
+        session = stripe.checkout.Session.create(
+            mode=req.mode,
+            line_items=[{"price": req.price_id, "quantity": 1}],
+            success_url=f"{app_url}?checkout=success",
+            cancel_url=f"{app_url}?checkout=cancel",
+            metadata={"user_id": req.user_id},
+            client_reference_id=req.user_id,
+        )
+        return {"url": session.url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/stripe-webhook")
+async def stripe_webhook(request: Request):
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature", "")
+
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+    except stripe.error.SignatureVerificationError:
+        raise HTTPException(status_code=400, detail="Invalid signature")
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        user_id = session.client_reference_id or (session.metadata or {}).get("user_id")
+        mode = session.mode
+
+        if not user_id:
+            return {"status": "ignored"}
+
+        if mode == "payment":
+            # Add 5 credits
+            existing = supabase_admin.from_("credits").select("balance").eq("user_id", user_id).maybe_single().execute()
+            current = existing.data["balance"] if (existing and existing.data) else 0
+            supabase_admin.from_("credits").upsert({
+                "user_id": user_id,
+                "balance": current + 5,
+                "updated_at": datetime.now(tz=timezone.utc).isoformat(),
+            }).execute()
+
+        elif mode == "subscription":
+            sub_id = session.subscription
+            sub = stripe.Subscription.retrieve(sub_id)
+            period_end = datetime.fromtimestamp(sub["current_period_end"], tz=timezone.utc).isoformat()
+            supabase_admin.from_("subscriptions").upsert({
+                "user_id": user_id,
+                "stripe_subscription_id": sub_id,
+                "stripe_customer_id": session.customer,
+                "status": sub["status"],
+                "current_period_end": period_end,
+                "updated_at": datetime.now(tz=timezone.utc).isoformat(),
+            }).execute()
+
+    elif event["type"] in ("customer.subscription.updated", "customer.subscription.deleted"):
+        sub = event["data"]["object"]
+        period_end = datetime.fromtimestamp(sub["current_period_end"], tz=timezone.utc).isoformat()
+        result = supabase_admin.from_("subscriptions").select("user_id").eq("stripe_subscription_id", sub["id"]).single().execute()
+        if result.data:
+            supabase_admin.from_("subscriptions").update({
+                "status": sub["status"],
+                "current_period_end": period_end,
+                "updated_at": datetime.now(tz=timezone.utc).isoformat(),
+            }).eq("stripe_subscription_id", sub["id"]).execute()
+
+    return {"status": "ok"}

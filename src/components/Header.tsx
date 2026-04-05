@@ -1,16 +1,46 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "../lib/utils";
+import { useAuth } from "../contexts/AuthContext";
+import { AccountDropdown } from "./AccountDrawer";
+import { LogIn } from "lucide-react";
 
 interface HeaderProps {
   step: number;
   onLogoClick: () => void;
   onStartClick: () => void;
+  onRestoreComparison?: (snapshot: any) => void;
 }
 
-export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
+export function Header({ step, onLogoClick, onStartClick, onRestoreComparison }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isPastHero, setIsPastHero] = useState(false);
   const [showNavCta, setShowNavCta] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [xOffset, setXOffset] = useState(0);
+  const buttonWrapperRef = useRef<HTMLDivElement>(null);
+
+  const { user, isLoading, signInWithGoogle } = useAuth();
+
+  const handleAvatarClick = () => {
+    if (drawerOpen) {
+      setDrawerOpen(false);
+      setXOffset(0);
+      return;
+    }
+    if (!isLight && buttonWrapperRef.current) {
+      const rect = buttonWrapperRef.current.getBoundingClientRect();
+      const gap = (window.innerWidth - rect.right - 12) * 0.85;
+      setXOffset(gap);
+      setTimeout(() => setDrawerOpen(true), 360);
+    } else {
+      setDrawerOpen(true);
+    }
+  };
+
+  const handleDropdownClose = () => {
+    setDrawerOpen(false);
+    setXOffset(0);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,6 +58,7 @@ export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
   }, []);
 
   const isMoved = step > 0 || isScrolled;
+  const isLight = isPastHero && step !== 4;
 
   return (
     <header
@@ -52,12 +83,16 @@ export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
               : "lg:translate-x-[-60px]",
           )}
         >
-          <div className={cn(!isPastHero && "filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]")}>
+          <div
+            className={cn(
+              !isPastHero && "filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]",
+            )}
+          >
             <img
               src={
                 !isMoved
                   ? "/compare_white.svg"
-                  : isPastHero && step !== 4
+                  : isLight
                     ? "/blue_comp_xs.svg"
                     : "/white_comp_xs.svg"
               }
@@ -72,19 +107,86 @@ export function Header({ step, onLogoClick, onStartClick }: HeaderProps) {
           </div>
         </button>
 
-        {step === 0 && (
-          <button
-            onClick={onStartClick}
-            className={cn(
-              "-translate-y-2 lg:-translate-y-3 -translate-x-4 sm:translate-x-0 bg-brand-500 hover:bg-brand-600 text-white px-3 py-1.5 sm:px-5 sm:py-2 lg:px-6 lg:py-2.5 rounded-full font-semibold text-[11px] sm:text-xs lg:text-sm transition-all duration-300 shadow-lg whitespace-nowrap",
-              showNavCta
-                ? "opacity-100 translate-y-0 pointer-events-auto"
-                : "opacity-0 -translate-y-1 pointer-events-none",
-            )}
-          >
-            Start Comparing
-          </button>
-        )}
+        <div className="flex items-center gap-3 -translate-y-2 lg:-translate-y-3">
+          {/* Start Comparing CTA — only on landing page after scrolling */}
+          {step === 0 && (
+            <button
+              onClick={onStartClick}
+              className={cn(
+                "bg-brand-500 hover:bg-brand-600 text-white px-3 py-1.5 sm:px-5 sm:py-2 lg:px-6 lg:py-2.5 rounded-full font-semibold text-[11px] sm:text-xs lg:text-sm transition-all duration-300 shadow-lg whitespace-nowrap",
+                showNavCta
+                  ? "opacity-100 translate-y-0 pointer-events-auto"
+                  : "opacity-0 -translate-y-1 pointer-events-none",
+              )}
+            >
+              Start Comparing
+            </button>
+          )}
+
+          {/* Auth button */}
+          {!isLoading && (
+            <>
+              {user ? (
+                <div>
+                  <div
+                    ref={buttonWrapperRef}
+                    className="relative"
+                    style={{
+                      transform: `translateX(${xOffset}px)`,
+                      transition:
+                        "transform 400ms cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}
+                  >
+                    <button
+                      onClick={handleAvatarClick}
+                      className={cn(
+                        "flex items-center gap-1.5 px-3 py-1.5 sm:px-5 sm:py-2 lg:px-6 lg:py-2.5 rounded-full font-semibold text-[11px] sm:text-xs lg:text-sm transition-all duration-300 shadow-lg",
+                        isLight
+                          ? "bg-white/90 hover:bg-white text-gray-800 border border-gray-200"
+                          : "bg-white/15 hover:bg-white/25 text-white border border-white/20",
+                      )}
+                    >
+                      {user.user_metadata?.avatar_url ? (
+                        <img
+                          src={user.user_metadata.avatar_url}
+                          alt="avatar"
+                          className="w-5 h-5 rounded-full"
+                        />
+                      ) : (
+                        <div className="w-5 h-5 rounded-full bg-brand-500 flex items-center justify-center text-white text-[10px] font-bold">
+                          {user.email?.[0]?.toUpperCase()}
+                        </div>
+                      )}
+                      <span className="hidden sm:inline max-w-[100px] truncate">
+                        {user.user_metadata?.full_name?.split(" ")[0] ??
+                          user.email}
+                      </span>
+                    </button>
+                    <AccountDropdown
+                      open={drawerOpen}
+                      onClose={handleDropdownClose}
+                      isLight={isLight}
+                      onRestoreComparison={onRestoreComparison}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={signInWithGoogle}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 sm:px-5 sm:py-2 lg:px-6 lg:py-2.5 rounded-full font-semibold text-[11px] sm:text-xs lg:text-sm transition-all duration-300 shadow-lg whitespace-nowrap",
+                    isLight
+                      ? "bg-white/90 hover:bg-white text-gray-800 border border-gray-200"
+                      : "bg-white/15 hover:bg-white/25 text-white border border-white/20",
+                  )}
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  Sign in
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </header>
   );

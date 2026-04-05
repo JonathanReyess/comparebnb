@@ -7,8 +7,16 @@ coverage/
 .env*
 !.env.example
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
 # Local tooling and scripts
 airbnb_scrape/
 .agents/
 .claude/skills/
+
+# Supabase schema / migrations
+supabase/
 

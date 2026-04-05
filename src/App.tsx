@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { TripDetails, ListingDetails, FillResult, Recommendation, Category, CategoryType } from "./types";
 import { PREDEFINED_CATEGORIES, NON_REMOVABLE_CATEGORY_IDS } from "./constants";
 import { fetchListingPrice, fetchListingDetails, fetchLocation, fetchFillData, fetchRecommendation, fetchReviewSummary } from "./services/geminiService";
@@ -9,10 +9,47 @@ import { TripDetailsStep } from "./components/steps/TripDetailsStep";
 import { CategoriesStep } from "./components/steps/CategoriesStep";
 import { ListingsStep } from "./components/steps/ListingsStep";
 import { ResultsStep } from "./components/steps/ResultsStep";
+import { PricingModal } from "./components/PricingModal";
+import { useUserAccess } from "./hooks/useUserAccess";
+import { useAuth } from "./contexts/AuthContext";
 
 export default function App() {
   const [step, setStep] = useState<0 | 1 | 2 | 3 | 4>(0);
   const slideDir = useRef<"right" | "left">("right");
+  const [checkoutBanner, setCheckoutBanner] = useState<"success" | "cancel" | null>(null);
+  const [showPricing, setShowPricing] = useState(false);
+  const { deductCredit, saveSnapshot, isLoading: accessLoading } = useUserAccess();
+  const { user, isLoading: authLoading, signInWithGoogle } = useAuth();
+
+  // Restore state after Stripe redirect
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get("checkout");
+    if (status === "success" || status === "cancel") {
+      window.history.replaceState({}, "", window.location.pathname);
+      setCheckoutBanner(status);
+      if (status === "success") {
+        // Restore saved comparison state so user lands back on results
+        try {
+          const saved = sessionStorage.getItem("cbnb_results_state");
+          if (saved) {
+            const s = JSON.parse(saved);
+            setTripDetails(s.tripDetails);
+            setSelectedCategories(s.selectedCategories);
+            setListingInputs(s.listingInputs);
+            setScrapedListingsData(s.scrapedListingsData);
+            setFillResult(s.fillResult);
+            setRecommendation(s.recommendation);
+            setReviewSummaries(s.reviewSummaries);
+            slideDir.current = "right";
+            setStep(4);
+          }
+        } catch {}
+      }
+      const delay = status === "success" ? 5000 : 4000;
+      setTimeout(() => setCheckoutBanner(null), delay);
+    }
+  }, []);
 
   const goTo = (next: 0 | 1 | 2 | 3 | 4, back = false) => {
     slideDir.current = back ? "left" : "right";
@@ -31,6 +68,8 @@ export default function App() {
   const [customCategoryName, setCustomCategoryName] = useState("");
   const [customCategoryType, setCustomCategoryType] = useState<CategoryType>("string");
 
+  const SESSION_KEY = "cbnb_results_state";
+
   const [listingInputs, setListingInputs] = useState<string[]>(["", ""]);
   const [scrapedListingsData, setScrapedListingsData] = useState<Array<{ details: ListingDetails | null; address: string | null; error?: string }>>([]);
   const [isScrapingListings, setIsScrapingListings] = useState(false);
@@ -39,6 +78,23 @@ export default function App() {
   const [reviewSummaries, setReviewSummaries] = useState<(string | null | undefined)[]>([]);
   const [isComparing, setIsComparing] = useState(false);
   const [isLoadingRecommendation, setIsLoadingRecommendation] = useState(false);
+
+  // Persist results state so we can restore it after Stripe redirect
+  useEffect(() => {
+    if (step === 4 && fillResult) {
+      try {
+        sessionStorage.setItem("cbnb_results_state", JSON.stringify({
+          tripDetails,
+          selectedCategories,
+          listingInputs,
+          scrapedListingsData,
+          fillResult,
+          recommendation,
+          reviewSummaries,
+        }));
+      } catch {}
+    }
+  }, [step, fillResult, recommendation]);
 
   const handleAddCategory = (category: Category) => {
     if (!selectedCategories.some((c) => c.id === category.id)) {
@@ -101,6 +157,12 @@ export default function App() {
   const handleCompare = async () => {
     const validInputs = listingInputs.filter((input) => input.trim() !== "");
 
+    // Gate: check and deduct credit before making any AI calls
+    if (authLoading || accessLoading) return; // wait for auth/credits to settle
+    if (!user) { signInWithGoogle(); return; }
+    const creditResult = await deductCredit();
+    if (creditResult === "no_credits") { setShowPricing(true); return; }
+
     setIsComparing(true);
     setFillResult(null);
     setRecommendation(null);
@@ -157,7 +219,22 @@ export default function App() {
         })),
         winners: fillRes.winners,
       })
-        .then(setRecommendation)
+        .then((rec) => {
+          setRecommendation(rec);
+          const title = validInputs
+            .map((_, i) => scrapedListingsData[i]?.details?.title ?? `Listing ${i + 1}`)
+            .join(" vs ");
+          saveSnapshot({
+            tripDetails,
+            selectedCategories,
+            listingInputs: validInputs,
+            scrapedListingsData,
+            fillResult: fillRes!,
+            recommendation: rec,
+            reviewSummaries: reviewSummaries,
+            title,
+          });
+        })
         .catch((e) => console.error("Recommendation failed:", e))
         .finally(() => setIsLoadingRecommendation(false));
     } else {
@@ -176,7 +253,33 @@ export default function App() {
         <div className="absolute inset-0 bg-gray-950/40 backdrop-blur-md" />
       </div>
 
-      <Header step={step} onLogoClick={() => goTo(0, true)} onStartClick={() => goTo(1)} />
+      {showPricing && <PricingModal onClose={() => setShowPricing(false)} />}
+
+      {checkoutBanner && (
+        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-[200] px-5 py-3 rounded-2xl shadow-xl text-sm font-semibold flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300 ${
+          checkoutBanner === "success"
+            ? "bg-emerald-500 text-white"
+            : "bg-gray-800 text-white"
+        }`}>
+          {checkoutBanner === "success" ? "🎉 Payment successful! Your credits have been added." : "Payment cancelled — no charge was made."}
+        </div>
+      )}
+      <Header
+        step={step}
+        onLogoClick={() => goTo(0, true)}
+        onStartClick={() => goTo(1)}
+        onRestoreComparison={(snapshot) => {
+          setTripDetails(snapshot.tripDetails);
+          setSelectedCategories(snapshot.selectedCategories);
+          setListingInputs(snapshot.listingInputs);
+          setScrapedListingsData(snapshot.scrapedListingsData);
+          setFillResult(snapshot.fillResult);
+          setRecommendation(snapshot.recommendation);
+          setReviewSummaries(snapshot.reviewSummaries);
+          slideDir.current = "right";
+          setStep(4);
+        }}
+      />
 
       <div
         key={step}
@@ -246,6 +349,7 @@ export default function App() {
                 listingDetails={listingInputs
                   .filter((u) => u.trim() !== "")
                   .map((_, i) => scrapedListingsData[i]?.details ?? null)}
+                listingUrls={listingInputs.filter((u) => u.trim() !== "")}
                 fillResult={fillResult}
                 isComparing={isComparing}
                 reviewSummaries={reviewSummaries}

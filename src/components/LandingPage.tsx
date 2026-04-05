@@ -91,12 +91,12 @@ export function LandingPage({ onStart }: LandingPageProps) {
           loop
           playsInline
           poster="/beach_landing_poster.jpg"
-          className="absolute inset-0 w-full h-full object-cover scale-105 blur-sm"
+          className="absolute inset-0 w-full h-full object-cover scale-105 blur-lg"
         >
           <source src="/beach_landing.webm" type="video/webm" />
           <source src="/beach_landing.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-950/75 via-gray-950/55 to-brand-900/50" />
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-950/75 via-gray-950/55 to-gray-950/40" />
 
         {/* Content — padded to clear the decorative logo, capped by h-screen */}
         <div className="relative z-10 flex-1 flex items-start">
@@ -121,9 +121,9 @@ export function LandingPage({ onStart }: LandingPageProps) {
                   transition={{ duration: 0.6, ease, delay: 0.25 }}
                   className="text-white/70 text-lg sm:text-xl mb-10 max-w-lg leading-relaxed font-normal"
                 >
-                  Paste your Airbnb and VRBO links, choose what matters to your
-                  group, and get a side-by-side breakdown with an AI pick — in
-                  under two minutes.
+                  Paste your Airbnb links, choose what matters to your group,
+                  and get a side-by-side breakdown with an AI pick — in under
+                  two minutes.
                 </motion.p>
 
                 <motion.div
@@ -333,7 +333,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
                 icon: <Link2 className="w-5 h-5" />,
                 num: "01",
                 title: "Paste any listing link",
-                desc: "Drop in URLs from Airbnb, VRBO, Booking.com, or anywhere else. We handle the data extraction automatically.",
+                desc: "Drop in Airbnb listing URLs. We handle the data extraction automatically.",
               },
               {
                 icon: <BarChart3 className="w-5 h-5" />,
@@ -436,7 +436,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
                     loc: "Aspen, CO",
                     price: "$620/night",
                     rating: "4.91",
-                    photo: "/Gemini_Generated_Image_ocfndocfndocfndo.png",
+                    photo: "/testimonial-1.jpg",
                     topPick: false,
                     zIndex: 2,
                     rotate: -14,
@@ -447,7 +447,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
                     loc: "Scottsdale, AZ",
                     price: "$310/night",
                     rating: "4.78",
-                    photo: "/Gemini_Generated_Image_zbas2uzbas2uzbas.png",
+                    photo: "/testimonial-2.jpg",
                     topPick: false,
                     zIndex: 3,
                     rotate: -7,
@@ -458,7 +458,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
                     loc: "Malibu, CA",
                     price: "$460/night",
                     rating: "4.87",
-                    photo: "/Gemini_Generated_Image_93p9b193p9b193p9.png",
+                    photo: "/testimonial-3.jpg",
                     topPick: true,
                     zIndex: 6,
                     rotate: -2,
@@ -469,7 +469,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
                     loc: "Lake Tahoe, CA",
                     price: "$548/night",
                     rating: "4.94",
-                    photo: "/Gemini_Generated_Image_soawoqsoawoqsoaw.png",
+                    photo: "/testimonial-4.jpg",
                     topPick: false,
                     zIndex: 4,
                     rotate: 11,
@@ -480,7 +480,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
                     loc: "Big Sur, CA",
                     price: "$710/night",
                     rating: "4.96",
-                    photo: "/Gemini_Generated_Image_2e1fec2e1fec2e1f.png",
+                    photo: "/testimonial-5.jpg",
                     topPick: false,
                     zIndex: 5,
                     rotate: 17,
@@ -519,6 +519,8 @@ export function LandingPage({ onStart }: LandingPageProps) {
                           src={p.photo}
                           alt={p.name}
                           draggable={false}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover"
                         />
                         {p.topPick && (
@@ -649,60 +651,6 @@ export function LandingPage({ onStart }: LandingPageProps) {
               </button>
             </motion.div>
           </div>
-        </div>
-      </section>
-
-      {/* ── Compatible platforms ───────────────────────────────── */}
-      <section className="py-16 bg-white border-y border-gray-100">
-        <div className="max-w-5xl mx-auto px-6">
-          <motion.p
-            {...fadeUp()}
-            className="text-center text-[10px] font-semibold text-gray-400 tracking-widest uppercase mb-10"
-          >
-            Paste links from any of these platforms
-          </motion.p>
-          <motion.div
-            className="flex items-center justify-center gap-10 md:gap-16 flex-wrap opacity-60"
-            {...(shouldReduce
-              ? {}
-              : {
-                  initial: "hidden",
-                  whileInView: "show",
-                  viewport: { once: true, margin: "-40px" },
-                  variants: {
-                    hidden: {},
-                    show: { transition: { staggerChildren: 0.09 } },
-                  },
-                })}
-          >
-            {[
-              { src: "/airbnb.png", alt: "Airbnb", href: "https://www.airbnb.com" },
-              { src: "/vrbo.png", alt: "VRBO", href: "https://www.vrbo.com" },
-              { src: "/booking.png", alt: "Booking.com", href: "https://www.booking.com" },
-              { src: "/expedia.png", alt: "Expedia", href: "https://www.expedia.com" },
-              { src: "/hotels.png", alt: "Hotels.com", href: "https://www.hotels.com" },
-            ].map(({ src, alt, href }) => (
-              <a key={alt} href={href} target="_blank" rel="noopener noreferrer">
-                <motion.img
-                  src={src}
-                  alt={alt}
-                  className="h-7 md:h-8 w-auto object-contain grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300 hover:scale-105"
-                  {...(shouldReduce
-                    ? {}
-                    : {
-                        variants: {
-                          hidden: { opacity: 0, y: 12 },
-                          show: {
-                            opacity: 1,
-                            y: 0,
-                            transition: { duration: 0.4, ease },
-                          },
-                        },
-                      })}
-                />
-              </a>
-            ))}
-          </motion.div>
         </div>
       </section>
 

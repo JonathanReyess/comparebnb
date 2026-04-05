@@ -4,3 +4,5 @@ pyairbnb
 google-genai
 python-dotenv
 geopy
+stripe
+supabase
